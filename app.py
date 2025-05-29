@@ -3,6 +3,7 @@ import os
 import re
 import random
 import smtplib
+import json
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, flash, send_from_directory
 from email.message import EmailMessage
@@ -28,7 +29,9 @@ EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
 
 # Google Sheets setup
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
+creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+
 client = gspread.authorize(creds)
 sheet = client.open("ECX PROGRESSION").sheet1
 
