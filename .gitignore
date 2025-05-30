@@ -6,11 +6,8 @@ __pycache__/
 *.sqlite3
 *.log
 *.zip
-*.docx
 # Ignore uploaded files but keep the folder
 static/uploads/*
 !static/uploads/.gitkeep
 generated/
 ecx-progression-app-*.json
-git config --global user.name "Jerwin Manzon"
-git config --global user.email "jerwinmanzon.ecx@gmail.com"
