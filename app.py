@@ -241,11 +241,12 @@ def fill_docx(data, images, save_path, incident_no):
             break
 
     if index_paragraph:
-        image_block = insert_paragraph_after(index_paragraph)
         for img_path in images:
-            run = image_block.add_run()
+            run = index_paragraph.add_run()
+            run.add_break()  # spacing after "INDEX:"
             run.add_picture(img_path, width=Inches(4))
-            run.add_break()  # Optional spacing between images
+            run.add_break()  # spacing between pictures
+
     else:
         for img_path in images:
             doc.add_picture(img_path, width=Inches(4))
