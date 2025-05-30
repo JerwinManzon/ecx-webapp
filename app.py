@@ -236,11 +236,13 @@ def fill_docx(data, images, save_path, incident_no):
             break
 
     if index_paragraph:
+        current_para = index_paragraph
         for img_path in images:
-            new_para = insert_paragraph_after(index_paragraph)
+            new_para = insert_paragraph_after(current_para)
             run = new_para.add_run()
             run.add_picture(img_path, width=Inches(4))
-            index_paragraph = new_para  # move forward for next insert
+            current_para = new_para  # chain insertions to avoid reverse order
+
     else:
         for img_path in images:
             doc.add_picture(img_path, width=Inches(4))
