@@ -1,4 +1,3 @@
-
 import os
 import re
 import random
@@ -130,7 +129,7 @@ def index():
 
         # Email
         # Determine recipients
-        recipients = [values[2], values[3]] # employee and supervisor
+        recipients = [values[2], values[3],"hr@ecxperience.com"] # employee, supervisor HR
         dep_head = values[12]  # index for "Department Head"
 
         if dep_head in DEPARTMENT_HEAD_EMAILS:
@@ -275,5 +274,3 @@ def send_email_with_attachment(to_emails, subject, body, attachment_path):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-IMMEDIATE_SUPERVISORS = [""]
