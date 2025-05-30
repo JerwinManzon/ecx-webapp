@@ -171,19 +171,24 @@ This is a system-generated message. No action is required unless otherwise indic
 
 
 def fill_docx(data, images, save_path, incident_no):
+    from docx.oxml import OxmlElement
+    from docx.shared import Inches
+    from docx import Document
+    from datetime import datetime
+
     def insert_paragraph_after(paragraph):
         new_p = OxmlElement("w:p")
         paragraph._p.addnext(new_p)
         return paragraph._parent.add_paragraph()
 
     doc = Document(TEMPLATE_PATH)
-    raw_time = data[10]
-    # Convert "HH:MM" 24-hour time to "hh:mm AM/PM"
+
+    # Format Time of Incident
     try:
-        raw_time = data[10]  # index for "Time of Incident"
+        raw_time = data[10]
         time_12hr = datetime.strptime(raw_time, "%H:%M").strftime("%I:%M %p")
     except Exception:
-        time_12hr = raw_time  # fallback if formatting fails
+        time_12hr = data[10]
 
     placeholders = {
         '[Incident No.]': incident_no,
@@ -213,24 +218,22 @@ def fill_docx(data, images, save_path, incident_no):
         for key, val in placeholders.items():
             new_text = new_text.replace(key, val)
         if new_text != full_text:
-            # Clear all runs
             for run in paragraph.runs:
                 run.text = ''
-            # Set new text in the first run
             paragraph.runs[0].text = new_text
 
-    # Process all paragraphs
+    # Replace placeholders in paragraphs
     for para in doc.paragraphs:
         replace_in_paragraph(para)
 
-    # Also process table cells (if any placeholders are in tables)
+    # Replace placeholders in table cells
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
                 for para in cell.paragraphs:
                     replace_in_paragraph(para)
 
-    # Find the paragraph containing "INDEX:"
+    # Find the paragraph with "INDEX:"
     index_paragraph = None
     for para in doc.paragraphs:
         if para.text.strip().upper() == "INDEX:":
@@ -238,10 +241,11 @@ def fill_docx(data, images, save_path, incident_no):
             break
 
     if index_paragraph:
+        image_block = insert_paragraph_after(index_paragraph)
         for img_path in images:
-            run = index_paragraph.add_run()
-            run.add_break()  # This adds line spacing after "INDEX:"
+            run = image_block.add_run()
             run.add_picture(img_path, width=Inches(4))
+            run.add_break()  # Optional spacing between images
     else:
         for img_path in images:
             doc.add_picture(img_path, width=Inches(4))
