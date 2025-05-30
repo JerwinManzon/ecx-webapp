@@ -70,7 +70,7 @@ DEPARTMENT_HEAD_EMAILS = {
     "Amelyn Talastas": "amelyntalastas.ecx@gmail.com",
     "Monique Curia": "moniquecuria.ecx@gmail.com",
     "Samuel Pastrana": "samuelpastrana.ecx@gmail.com",
-    "Jaycee Quijano": "Jaycee@ecxperience.com"
+    "Jaycee Quijano": "jaycee@ecxperience.com"
 }
 
 ROLE_OPTIONS = [
