@@ -75,20 +75,25 @@
   <h1>ECX Incident Report</h1>
 
   {% if generated_file %}
-    <script>
-      window.onload = function() {
-        const link = document.createElement('a');
-        link.href = "{{ url_for('download_file', filename=generated_file + '.docx') }}";
-        link.download = "{{ generated_file }}.docx";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      };
-    </script>
-    <noscript>
-      JavaScript is disabled. <a href="{{ url_for('download_file', filename=generated_file + '.docx') }}">Click here to download the file</a>.
-    </noscript>
-  {% endif %}
+  <script>
+    window.onload = function() {
+      const link = document.createElement('a');
+      link.href = "{{ url_for('download_file', filename=generated_file + '.docx') }}";
+      link.download = "{{ generated_file }}.docx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Remove ?generated=... from URL without reloading
+      if (window.history.replaceState) {
+        const url = new URL(window.location);
+        url.searchParams.delete('generated');
+        window.history.replaceState({}, document.title, url.pathname);
+      }
+    };
+  </script>
+{% endif %}
+
 
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
