@@ -12,6 +12,8 @@ import gspread
 from docx import Document
 from docx.shared import Inches
 from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.text.paragraph import Paragraph
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -241,7 +243,7 @@ def fill_docx(data, images, save_path, incident_no):
             new_para = insert_paragraph_after(current_para)
             run = new_para.add_run()
             run.add_picture(img_path, width=Inches(4))
-            current_para = new_para  # chain insertions to avoid reverse order
+            current_para = new_para  # move forward for next insert
 
     else:
         for img_path in images:
