@@ -238,18 +238,10 @@ def fill_docx(data, images, save_path, incident_no):
             break
 
     if index_paragraph:
-        parent = index_paragraph._element.getparent()
-        index_idx = parent.index(index_paragraph._element)
-
         for img_path in images:
-            # Create a new paragraph element
-            new_paragraph = doc.add_paragraph()
-            run = new_paragraph.add_run()
+            run = index_paragraph.add_run()
+            run.add_break()  # This adds line spacing after "INDEX:"
             run.add_picture(img_path, width=Inches(4))
-
-            # Insert the new paragraph after the INDEX paragraph
-            parent.insert(index_idx + 1, new_paragraph._element)
-            index_idx += 1  # Move insertion point forward for next image
     else:
         for img_path in images:
             doc.add_picture(img_path, width=Inches(4))
