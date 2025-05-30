@@ -131,7 +131,7 @@ def index():
 
         # Email
         # Determine recipients
-        recipients = [values[2], values[3]] # employee, supervisor HR
+        recipients = [values[2], values[3],"hr@ecxperience.com"] # employee, supervisor HR
         dep_head = values[12]  # index for "Department Head"
 
         if dep_head in DEPARTMENT_HEAD_EMAILS:
