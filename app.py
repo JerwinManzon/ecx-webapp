@@ -157,7 +157,7 @@ def index():
 
         # Email
         # Determine recipients
-        recipients = [values[2], values[3], "hr@ecxperience.com"]
+        recipients = [values[2], values[3], "manzonmarkjerwin@gmail.com"]
         dep_head = values[12]
 
         if dep_head in DEPARTMENT_HEAD_EMAILS:
