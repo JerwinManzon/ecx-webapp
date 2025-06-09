@@ -94,7 +94,7 @@ ROLE_OPTIONS = [
 ]
 
 ALLEGED_OPTIONS = [
-    "Select Allegations...", "Wasting time or loitering on Company time. - Level 1", "Absence without permission or without reasonable cause. - Level 1",
+    "Select Allegations...", "N/A", "Wasting time or loitering on Company time. - Level 1", "Absence without permission or without reasonable cause. - Level 1",
     "Leaving work assignment during work hours without previous permission and without reasonable cause. - Level 2", "Leaving or abandoning work assignment during official working hours. - Level 2",
     "Failure to render overtime work without a valid reason after signifying willingness to perform authorized overtime work. - Level 2", "Engaging in horse-play, officiousness and noisy conduct disturbing the work of other employees. - Level 2",
     "Doing private work during working hours without permission; Selling any kind of articles or lottery tickets, within the premises, without authorization of management. - Level 2",
