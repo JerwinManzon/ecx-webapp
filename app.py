@@ -40,6 +40,21 @@ app = Flask(__name__)
 app.secret_key = "ecx-secret"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+#FOR LOCAL TESTING
+# # Email
+# SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
+# EMAIL_PASSWORD = "bverlbfblogutkkf"
+#
+# # Google Sheets setup
+# scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+# creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
+# client = gspread.authorize(creds)
+# sheet = client.open("ECX PROGRESSION").sheet1
+#
+# app = Flask(__name__)
+# app.secret_key = "ecx-secret"
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 FIELDS = [
     "Employee Email", "Immediate Supervisor Email", "Reported By", "Reported By Title/Role", "Date of Report",
     "Employee Name", "Employee Title/Role", "Date of Incident", "Time of Incident",
@@ -78,6 +93,17 @@ ROLE_OPTIONS = [
     "Operations Manager","Operations Success Coordinator", "HR", "Finance", "Accounting", "IT", "Security", "Utility"
 ]
 
+ALLEGED_OPTIONS = [
+    "Select Allegations...", "Wasting time or loitering on Company time. - Level 1", "Absence without permission or without reasonable cause. - Level 1",
+    "Leaving work assignment during work hours without previous permission and without reasonable cause. - Level 2", "Leaving or abandoning work assignment during official working hours. - Level 2",
+    "Failure to render overtime work without a valid reason after signifying willingness to perform authorized overtime work. - Level 2", "Engaging in horse-play, officiousness and noisy conduct disturbing the work of other employees. - Level 2",
+    "Doing private work during working hours without permission; Selling any kind of articles or lottery tickets, within the premises, without authorization of management. - Level 2",
+    "Sleeping while on duty. - Level 2", "Willful or negligent disregard for standard operating procedures or processes. - Level 2", "Malingering or feigning illness to avoid doing assigned work during work hours. - Level 2",
+    "Use of internet during office hours not related to work functions in the production area. - Level 2", "Instigating or willful disruption/ sabotage or slow-down of work. - Level 2",
+    "Abuse of personal privileges such as extended breaks. - Level 2", "Bringing food and eating in production area (only hard candies and drinks in spill-proof canisters). - Level 2",
+    "Unexcused absences or tardiness without prior notification to supervisor and Human Resources. For emergency leaves, unexcused absences or tardiness without notification to supervisor and Human Resources within the period provided in this handbook. - Level 2",
+    "Going on undertime without prior approval from the Immediate Supervisor/Manager. - Level 3", "Altering/manipulating timekeeping records - for a co-employee or for one's self. - Level 4"
+]
 def is_valid_email(email):
     return re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email)
 
@@ -131,11 +157,14 @@ def index():
 
         # Email
         # Determine recipients
-        recipients = [values[2], values[3],"hr@ecxperience.com"] # employee, supervisor HR
-        dep_head = values[12]  # index for "Department Head"
+        recipients = [values[2], values[3], "hr@ecxperience.com"]
+        dep_head = values[12]
 
         if dep_head in DEPARTMENT_HEAD_EMAILS:
             recipients.append(DEPARTMENT_HEAD_EMAILS[dep_head])
+
+        # 🔐 Eliminate duplicates (like repeated HR)
+        recipients = list(set(email.lower() for email in recipients))
 
         send_email_with_attachment(
             recipients,
@@ -166,7 +195,8 @@ This is a system-generated message. No action is required unless otherwise indic
         today=today_str,
         recommendation_options=RECOMMENDATION_OPTIONS,
         department_head_options=DEPARTMENT_HEAD_OPTIONS,
-        role_options=ROLE_OPTIONS
+        role_options=ROLE_OPTIONS,
+        alleged_options=ALLEGED_OPTIONS
     )
 
 
