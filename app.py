@@ -89,7 +89,7 @@ DEPARTMENT_HEAD_EMAILS = {
 }
 
 ROLE_OPTIONS = [
-    "Select Title/Role...", "Agent", "Team Lead","Trainer", "Data Scientist", "Assistant Operations Manager",
+    "Select Title/Role...", "CSA Agent", "Vouchering Agent", "OTR Agent", "QA AGENT", "Accounting Agent", "Team Lead","Trainer", "Data Scientist", "Assistant Operations Manager",
     "Operations Manager","Operations Success Coordinator", "HR", "Finance", "Accounting", "IT", "Security", "Utility"
 ]
 
