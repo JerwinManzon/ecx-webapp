@@ -24,36 +24,36 @@ CREDENTIALS_PATH = 'ecx-progression-app-460516-54ee54fb1563.json'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 # Email
-SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
-EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
-
-
-# Google Sheets setup
-scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
-creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-
-client = gspread.authorize(creds)
-sheet = client.open("ECX PROGRESSION").sheet1
-
-app = Flask(__name__)
-app.secret_key = "ecx-secret"
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-#FOR LOCAL TESTING
-# # Email
-# SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
-# EMAIL_PASSWORD = "bverlbfblogutkkf"
+# SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
+# EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
+#
 #
 # # Google Sheets setup
 # scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-# creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
+# creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+# creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+#
 # client = gspread.authorize(creds)
 # sheet = client.open("ECX PROGRESSION").sheet1
 #
 # app = Flask(__name__)
 # app.secret_key = "ecx-secret"
 # app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+#FOR LOCAL TESTING
+# # Email
+SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
+EMAIL_PASSWORD = "bverlbfblogutkkf"
+
+# Google Sheets setup
+scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
+client = gspread.authorize(creds)
+sheet = client.open("ECX PROGRESSION").sheet1
+
+app = Flask(__name__)
+app.secret_key = "ecx-secret"
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 FIELDS = [
     "Employee Email", "Immediate Supervisor Email", "Reported By", "Reported By Title/Role", "Date of Report",
@@ -121,21 +121,52 @@ def allowed_file(filename):
 def index():
     if request.method == "POST":
         values = []
+        errors = []
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         incident_no = generate_incident_no()
         values.extend([timestamp, incident_no])
 
+        previous_values = {}
+
         for field in FIELDS:
             val = request.form.get(field, "").strip()
+            previous_values[field] = val  # Store all user input
             if not val:
-                flash(f"Please complete the '{field}' field.")
-                return redirect("/")
+                errors.append(f"Please complete the '{field}' field.")
             values.append(val)
+
+        # If there are errors, flash all of them and re-render the form
+        if errors:
+            for error in errors:
+                flash(error, "danger")
+            return render_template(
+                "progression_form.html",
+                fields=FIELDS,
+                multiline_fields=MULTILINE_FIELDS,
+                today=datetime.now().strftime("%Y-%m-%d"),
+                recommendation_options=RECOMMENDATION_OPTIONS,
+                department_head_options=DEPARTMENT_HEAD_OPTIONS,
+                role_options=ROLE_OPTIONS,
+                alleged_options=ALLEGED_OPTIONS,
+                previous_values=previous_values  # So fields retain user input
+            )
 
         # Email validation
         if not is_valid_email(values[2]) or not is_valid_email(values[3]):
             flash("Invalid email address.", "danger")
-            return redirect("/")
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            return render_template(
+                "progression_form.html",
+                fields=FIELDS,
+                multiline_fields=MULTILINE_FIELDS,
+                generated_file=None,
+                today=today_str,
+                recommendation_options=RECOMMENDATION_OPTIONS,
+                department_head_options=DEPARTMENT_HEAD_OPTIONS,
+                role_options=ROLE_OPTIONS,
+                alleged_options=ALLEGED_OPTIONS,
+                previous_values=request.form
+            )
 
         # Save to Google Sheet
         sheet.append_row(values)
@@ -157,7 +188,7 @@ def index():
 
         # Email
         # Determine recipients
-        recipients = [values[2], values[3], "hr@ecxperience.com"]
+        recipients = [values[2], values[3], "hr@ecx"]
         dep_head = values[12]
 
         if dep_head in DEPARTMENT_HEAD_EMAILS:
@@ -188,7 +219,7 @@ This is a system-generated message. No action is required unless otherwise indic
     today_str = datetime.now().strftime("%Y-%m-%d")
     generated_file = request.args.get("generated")
     return render_template(
-        "form.html",
+        "progression_form.html",
         fields=FIELDS,
         multiline_fields=MULTILINE_FIELDS,
         generated_file=generated_file,
