@@ -60,6 +60,16 @@
       border-radius: 10px;
     }
 
+    .alert .btn-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 1rem;
+    }
+    .alert {
+      position: relative;
+      padding-right: 3rem; /* ensure space for close button */
+    }
+
     img.logo {
       max-width: 150px;
       margin-bottom: 20px;
@@ -96,14 +106,17 @@
   {% endif %}
 
   {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} mt-3" role="alert">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} mt-3" role="alert">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+
 
   <form method="POST" enctype="multipart/form-data">
     {% for field in fields %}
@@ -114,28 +127,60 @@
         {% if field == "Immediate Supervisor Recommendation" %}
         <select name="{{ field }}" id="{{ field_id }}" class="form-select" required>
           {% for option in recommendation_options %}
-            <option value="{{ option }}" {% if loop.index0 == 0 %}disabled selected{% endif %}>{{ option }}</option>
+            <option value="{{ option }}"
+              {% if previous_values and previous_values.get(field) == option %}
+                selected
+              {% elif not previous_values and loop.index0 == 0 %}
+                selected disabled
+              {% elif loop.index0 == 0 %}
+                disabled
+              {% endif %}
+            >{{ option }}</option>
           {% endfor %}
         </select>
 
         {% elif field == "Department Head" %}
         <select name="{{ field }}" id="{{ field_id }}" class="form-select" required>
           {% for option in department_head_options %}
-            <option value="{{ option }}" {% if loop.index0 == 0 %}disabled selected{% endif %}>{{ option }}</option>
+            <option value="{{ option }}"
+              {% if previous_values and previous_values.get(field) == option %}
+                selected
+              {% elif not previous_values and loop.index0 == 0 %}
+                selected disabled
+              {% elif loop.index0 == 0 %}
+                disabled
+              {% endif %}
+            >{{ option }}</option>
           {% endfor %}
         </select>
 
         {% elif field == "Employee Title/Role" or field == "Reported By Title/Role" %}
         <select name="{{ field }}" id="{{ field_id }}" class="form-select" required>
           {% for option in role_options %}
-            <option value="{{ option }}" {% if loop.index0 == 0 %}disabled selected{% endif %}>{{ option }}</option>
+           <option value="{{ option }}"
+              {% if previous_values and previous_values.get(field) == option %}
+                selected
+              {% elif not previous_values and loop.index0 == 0 %}
+                selected disabled
+              {% elif loop.index0 == 0 %}
+                disabled
+              {% endif %}
+           >{{ option }}</option>
           {% endfor %}
         </select>
 
         {% elif field == "Alleged Violation" %}
         <select name="{{ field }}" id="{{ field_id }}" class="form-select select2-allegation" required>
           {% for option in alleged_options %}
-            <option value="{{ option }}" {% if loop.index0 == 0 %}disabled selected{% endif %}>{{ option }}</option>
+            <option value="{{ option }}"
+              {% if previous_values and previous_values.get(field) == option %}
+                selected
+              {% elif not previous_values and loop.index0 == 0 %}
+                selected disabled
+              {% elif loop.index0 == 0 %}
+                disabled
+              {% endif %}
+            >{{ option }}</option>
           {% endfor %}
         </select>
 
@@ -146,10 +191,13 @@
         <input type="time" name="{{ field }}" id="{{ field_id }}" class="form-control" required>
 
         {% elif field in multiline_fields %}
-        <textarea name="{{ field }}" id="{{ field_id }}" class="form-control" rows="3"></textarea>
+        <textarea name="{{ field }}" id="{{ field_id }}" class="form-control" rows="3">{{ previous_values.get(field, '') if previous_values else '' }}</textarea>
 
         {% else %}
-        <input type="text" name="{{ field }}" id="{{ field_id }}" class="form-control" required>
+        <input type="text" name="{{ field }}" id="{{ field_id }}" class="form-control" required value="{{ previous_values.get(field, '') if previous_values else '' }}">
+        {% if invalid_fields and invalid_fields.get(field) %}
+          <div class="text-danger mt-1" style="font-size: 0.9em;">{{ invalid_fields[field] }}</div>
+        {% endif %}
         {% endif %}
       </div>
     {% endfor %}
@@ -167,6 +215,8 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
   $(document).ready(function() {
     $('.select2-allegation').select2({
@@ -175,5 +225,17 @@
     });
   });
 </script>
+<script>
+  // Automatically dismiss flash alerts after 15 seconds
+  setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      alert.classList.remove('show');
+      alert.classList.add('fade');
+      setTimeout(() => alert.remove(), 500); // Remove element after fade-out
+    });
+  }, 15000);
+</script>
+
 </body>
 </html>
