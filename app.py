@@ -24,36 +24,36 @@ CREDENTIALS_PATH = 'ecx-progression-app-460516-54ee54fb1563.json'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 # Email
-# SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
-# EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
-#
-#
-# # Google Sheets setup
-# scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-# creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
-# creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-#
-# client = gspread.authorize(creds)
-# sheet = client.open("ECX PROGRESSION").sheet1
-#
-# app = Flask(__name__)
-# app.secret_key = "ecx-secret"
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
+EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
 
-#FOR LOCAL TESTING
-# # Email
-SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
-EMAIL_PASSWORD = "bverlbfblogutkkf"
 
 # Google Sheets setup
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
+creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
+
 client = gspread.authorize(creds)
 sheet = client.open("ECX PROGRESSION").sheet1
 
 app = Flask(__name__)
 app.secret_key = "ecx-secret"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+#FOR LOCAL TESTING
+# # Email
+# SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
+# EMAIL_PASSWORD = "bverlbfblogutkkf"
+#
+# # Google Sheets setup
+# scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+# creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
+# client = gspread.authorize(creds)
+# sheet = client.open("ECX PROGRESSION").sheet1
+#
+# app = Flask(__name__)
+# app.secret_key = "ecx-secret"
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 FIELDS = [
     "Employee Email", "Immediate Supervisor Email", "Reported By", "Reported By Title/Role", "Date of Report",
