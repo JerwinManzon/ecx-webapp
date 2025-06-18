@@ -37,7 +37,7 @@ sheet = client.open("ECX PROGRESSION").sheet1
 
 # IT Form Google Sheets Setup
 it_creds_dict = json.loads(os.getenv("GOOGLE_IT_CREDS_JSON"))
-it_creds = Credentials.from_service_account_file(it_creds_dict, scopes=SCOPE)
+it_creds = Credentials.from_service_account_info(it_creds_dict, scopes=SCOPE)
 it_client = gspread.authorize(it_creds)
 it_sheet = it_client.open("IT REQUEST FORM REPOSITORY").sheet1
 
