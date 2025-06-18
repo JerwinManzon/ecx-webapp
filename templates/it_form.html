@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ECX Incident Report Form</title>
+  <title>ECX IT Ticket Form</title>
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/ECXperience_icon.ico') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -90,35 +90,12 @@
     <img src="{{ url_for('static', filename='images/ECXperience logo.png') }}" alt="ECX Logo" class="logo">
   </div>
 
-  <h1>ECX Incident Report</h1>
+  <h1>ECX IT FORM</h1>
   <div class="mb-4 text-center">
     <a href="{{ url_for('home') }}" class="btn btn-outline-primary" style="padding: 10px 290px; border-radius: 8px; font-weight: 500;">
     ← Back to Home
     </a>
   </div>
-
-
-
-
-  {% if generated_file %}
-  <script>
-    window.onload = function() {
-      const link = document.createElement('a');
-      link.href = "{{ url_for('download_file', filename=generated_file + '.docx') }}";
-      link.download = "{{ generated_file }}.docx";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Remove ?generated=... from URL without reloading
-      if (window.history.replaceState) {
-        const url = new URL(window.location);
-        url.searchParams.delete('generated');
-        window.history.replaceState({}, document.title, url.pathname);
-      }
-    };
-  </script>
-  {% endif %}
 
   {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -131,17 +108,15 @@
 {% endwith %}
 
 
-
-
   <form method="POST" enctype="multipart/form-data">
-    {% for field in fields %}
+    {% for field in it_fields %}
       {% set field_id = field|lower|replace(" ", "-")|replace("/", "")|replace("(", "")|replace(")", "") ~ "-" ~ loop.index %}
       <div class="mb-3">
         <label for="{{ field_id }}">{{ field }}</label>
 
-        {% if field == "Immediate Supervisor Recommendation" %}
+        {% if field == "LOB" %}
         <select name="{{ field }}" id="{{ field_id }}" class="form-select" required>
-          {% for option in recommendation_options %}
+          {% for option in lob_options %}
             <option value="{{ option }}"
               {% if previous_values and previous_values.get(field) == option %}
                 selected
@@ -154,9 +129,9 @@
           {% endfor %}
         </select>
 
-        {% elif field == "Department Head" %}
+        {% elif field == "Location" %}
         <select name="{{ field }}" id="{{ field_id }}" class="form-select" required>
-          {% for option in department_head_options %}
+          {% for option in location_options %}
             <option value="{{ option }}"
               {% if previous_values and previous_values.get(field) == option %}
                 selected
@@ -169,24 +144,9 @@
           {% endfor %}
         </select>
 
-        {% elif field == "Employee Title/Role" or field == "Reported By Title/Role" %}
+        {% elif field == "Request Type" %}
         <select name="{{ field }}" id="{{ field_id }}" class="form-select" required>
-          {% for option in role_options %}
-           <option value="{{ option }}"
-              {% if previous_values and previous_values.get(field) == option %}
-                selected
-              {% elif not previous_values and loop.index0 == 0 %}
-                selected disabled
-              {% elif loop.index0 == 0 %}
-                disabled
-              {% endif %}
-           >{{ option }}</option>
-          {% endfor %}
-        </select>
-
-        {% elif field == "Alleged Violation" %}
-        <select name="{{ field }}" id="{{ field_id }}" class="form-select select2-allegation" required>
-          {% for option in alleged_options %}
+          {% for option in request_options %}
             <option value="{{ option }}"
               {% if previous_values and previous_values.get(field) == option %}
                 selected
@@ -202,10 +162,7 @@
         {% elif "Date" in field %}
         <input type="date" name="{{ field }}" id="{{ field_id }}" class="form-control" value="{{ today }}" required>
 
-        {% elif "Time" in field %}
-        <input type="time" name="{{ field }}" id="{{ field_id }}" class="form-control" required>
-
-        {% elif field in multiline_fields %}
+        {% elif field in it_multiline_fields %}
         <textarea name="{{ field }}" id="{{ field_id }}" class="form-control" rows="3">{{ previous_values.get(field, '') if previous_values else '' }}</textarea>
 
         {% else %}
@@ -217,11 +174,6 @@
       </div>
     {% endfor %}
 
-    <div class="mb-3">
-      <label>Upload Images (optional):</label>
-      <input type="file" name="images" multiple class="form-control">
-    </div>
-
     <div class="text-center">
       <button type="submit">Submit</button>
     </div>
@@ -232,14 +184,6 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-  $(document).ready(function() {
-    $('.select2-allegation').select2({
-      placeholder: 'Select Allegation...',
-      width: '100%'
-    });
-  });
-</script>
 <script>
   // Automatically dismiss flash alerts after 15 seconds
   setTimeout(function() {

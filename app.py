@@ -21,39 +21,50 @@ load_dotenv()
 UPLOAD_FOLDER = 'static/uploads'
 TEMPLATE_PATH = 'Template.docx'
 CREDENTIALS_PATH = 'ecx-progression-app-460516-54ee54fb1563.json'
+IT_CREDENTIALS_PATH = 'it-progression-form-83b2a28b0704.json'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
+SCOPE = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+#------------------------------------------------ LIVE -----------------------------------------------------------------
 # Email
-SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
-EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
+# SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
+# EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
+#
+# # Google Sheets setup
+# creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+# creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPE)
+# client = gspread.authorize(creds)
+# sheet = client.open("ECX PROGRESSION").sheet1
+#
+# # IT Form Google Sheets Setup
+# it_creds_dict = json.loads(os.getenv("GOOGLE_IT_CREDS_JSON"))
+# it_creds = Credentials.from_service_account_file(it_creds_dict, scopes=SCOPE)
+# it_client = gspread.authorize(it_creds)
+# it_sheet = it_client.open("IT REQUEST FORM REPOSITORY").sheet1
+#
+# app = Flask(__name__)
+# app.secret_key = "ecx-secret"
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+#------------------------------------------------ LOCAL TESTING --------------------------------------------------------
+# # Email
+SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
+EMAIL_PASSWORD = "bverlbfblogutkkf"
 
 # Google Sheets setup
-scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
-creds = Credentials.from_service_account_info(creds_dict, scopes=scope)
-
+creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPE)
 client = gspread.authorize(creds)
 sheet = client.open("ECX PROGRESSION").sheet1
+
+# IT Form Google Sheets Setup
+it_creds = Credentials.from_service_account_file(IT_CREDENTIALS_PATH, scopes=SCOPE)
+it_client = gspread.authorize(it_creds)
+it_sheet = it_client.open("IT REQUEST FORM REPOSITORY").sheet1
 
 app = Flask(__name__)
 app.secret_key = "ecx-secret"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-#FOR LOCAL TESTING
-# # Email
-# SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
-# EMAIL_PASSWORD = "bverlbfblogutkkf"
-#
-# # Google Sheets setup
-# scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-# creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=scope)
-# client = gspread.authorize(creds)
-# sheet = client.open("ECX PROGRESSION").sheet1
-#
-# app = Flask(__name__)
-# app.secret_key = "ecx-secret"
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+#----------------------------------------------- START OF WEB-APP ------------------------------------------------------
 
 FIELDS = [
     "Employee Email", "Immediate Supervisor Email", "Reported By", "Reported By Title/Role", "Date of Report",
@@ -102,8 +113,9 @@ ALLEGED_OPTIONS = [
     "Use of internet during office hours not related to work functions in the production area. - Level 2", "Instigating or willful disruption/ sabotage or slow-down of work. - Level 2",
     "Abuse of personal privileges such as extended breaks. - Level 2", "Bringing food and eating in production area (only hard candies and drinks in spill-proof canisters). - Level 2",
     "Unexcused absences or tardiness without prior notification to supervisor and Human Resources. For emergency leaves, unexcused absences or tardiness without notification to supervisor and Human Resources within the period provided in this handbook. - Level 2",
-    "Going on undertime without prior approval from the Immediate Supervisor/Manager. - Level 3", "Altering/manipulating timekeeping records - for a co-employee or for one's self. - Level 4"
+    "Going on under time without prior approval from the Immediate Supervisor/Manager. - Level 3", "Altering/manipulating timekeeping records - for a co-employee or for one's self. - Level 4"
 ]
+
 def is_valid_email(email):
     return re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email)
 
@@ -117,8 +129,12 @@ def generate_incident_no():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route("/", methods=["GET", "POST"])
-def index():
+@app.route("/")
+def home():
+    return render_template("Index.html")
+
+@app.route("/progression_form", methods=["GET", "POST"])
+def progression_form():
     if request.method == "POST":
         values = []
         errors = []
@@ -169,7 +185,12 @@ def index():
             )
 
         # Save to Google Sheet
-        sheet.append_row(values)
+        try:
+            sheet.append_row(values)
+        except Exception as e:
+            flash("An error occurred while submitting to the spreadsheet. Please try again later.", "danger")
+            print(f"[GSheet Error] {e}")
+            return redirect(request.url)
 
         # Process uploaded images
         images = request.files.getlist("images")
@@ -188,13 +209,13 @@ def index():
 
         # Email
         # Determine recipients
-        recipients = [values[2], values[3], "hr@ecxperience.com"]
+        recipients = [values[2], values[3], "manzonmarkjerwin@gmail.com"]
         dep_head = values[12]
 
         if dep_head in DEPARTMENT_HEAD_EMAILS:
             recipients.append(DEPARTMENT_HEAD_EMAILS[dep_head])
 
-        # 🔐 Eliminate duplicates (like repeated HR)
+        # Eliminate duplicates (like repeated HR)
         recipients = list(set(email.lower() for email in recipients))
 
         send_email_with_attachment(
@@ -213,7 +234,7 @@ This is a system-generated message. No action is required unless otherwise indic
         )
 
         flash("Incident report submitted successfully.", "success")
-        return redirect(f"/?generated={incident_no}")
+        return redirect(f"/progression_form?generated={incident_no}")
 
     # GET method (default view)
     today_str = datetime.now().strftime("%Y-%m-%d")
@@ -338,6 +359,133 @@ def send_email_with_attachment(to_emails, subject, body, attachment_path):
         print(f"Failed to send email: {e}")
         flash("Form submitted, but failed to send email notification.", "danger")
 
+#-------------------------------------------------- IT FORM -------------------------------------------------------------------------
 
+def generate_ticket_no():
+    existing_ids = sheet.col_values(2)[1:]
+    while True:
+        ir = random.randint(1000000000, 9999999999)
+        if ir not in existing_ids:
+            return ir
+
+def send_email(to_emails, subject, body):
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = ', '.join(to_emails)
+    msg.set_content(body)
+
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+            smtp.starttls()
+            smtp.login(SENDER_EMAIL, EMAIL_PASSWORD)
+            smtp.send_message(msg)
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        flash("Form submitted, but failed to send email notification.", "danger")
+
+#------------------------------------------IT FORM GENERATION -----------------------------------------------------------------------
+
+IT_FIELDS =["Email Address", "Agent Name", "Team Lead", "LOB", "Location", "PC Number", "Request Type", "Specific Request", "Date Requested"]
+
+LOCATION_OPTIONS = ["Select Location...", "EC Cafe", "Eskina", "Parking Area", "Resto Bar", "Snack Bar", "Training Room", "Conference Room", "2nd Floor (COO Office)", "2nd Floor (HR Office)",
+            "2nd Floor (Finance Office)", "3rd Floor (Phase 1)", "3rd Floor (Phase 2)", "4th Floor (Phase 1)", "4th Floor (Phase 2)", "5th Floor (Phase 1)", "5th Floor (CEO Office)"
+            ]
+REQUEST_OPTIONS = ["Select a Request...", "Assistance", "Network Problem", "Software Installation","System Issue", "Replacement", "Equipment Request"]
+
+IT_MULTILINE_FIELDS = ["Specific Request"]
+
+LOB_OPTIONS = ["Select LOB...", "N/A", "Accounting", "Banking Team", "Best Buy", "Buffer", "Convenience", "Dollar General", "Hospitality", "Industrial Retail", "M&I", "OTR", "Properties","QA", "Restaurant", "Retail", "SMB",
+               "Specialty Retail", "Starbucks", "TJX", "TJX-FEDEX","Vouchering", "Walmart", "Weekend Coverage", "Whole Foods"]
+
+@app.route("/it_form", methods =["GET", "POST"])
+def it_form():
+    if request.method == "POST":
+        values = []
+        errors = []
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ticket_no = generate_ticket_no()
+        values.extend([timestamp, ticket_no])
+
+        previous_values = {}
+
+        for field in IT_FIELDS:
+            val = request.form.get(field, "").strip()
+            previous_values[field] = val  # Store all user input
+            if not val:
+                errors.append(f"Please complete the '{field}' field.")
+            values.append(val)
+
+        # If there are errors, flash all of them and re-render the form
+        if errors:
+            for error in errors:
+                flash(error, "danger")
+            return render_template(
+                "it_form.html",
+                it_fields=IT_FIELDS,
+                it_multiline_fields=IT_MULTILINE_FIELDS,
+                today=datetime.now().strftime("%Y-%m-%d"),
+                location_options=LOCATION_OPTIONS,
+                request_options=REQUEST_OPTIONS,
+                lob_options=LOB_OPTIONS,
+                previous_values=previous_values  # So fields retain user input
+            )
+
+        # Email validation
+        if not is_valid_email(values[2]):
+            flash("Invalid email address.", "danger")
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            return render_template(
+                "it_form.html",
+                it_fields=IT_FIELDS,
+                it_multiline_fields=IT_MULTILINE_FIELDS,
+                today=today_str,
+                location_options=LOCATION_OPTIONS,
+                request_options=REQUEST_OPTIONS,
+                lob_options=LOB_OPTIONS,
+                previous_values=request.form
+            )
+
+        # Save to Google Sheet
+        try:
+            it_sheet.append_row(values)
+        except Exception as e:
+            flash("An error occurred while submitting to the spreadsheet. Please try again later.", "danger")
+            print(f"[GSheet Error] {e}")
+            return redirect(request.url)
+
+        # Email
+        # Determine recipients
+        recipients = [values[2], "manzonmarkjerwin@gmail.com"]
+
+        #  Eliminate duplicates
+        recipients = list(set(email.lower() for email in recipients))
+
+        send_email(
+            recipients,
+            f"Automated Notification: IT Ticket Sent & Logged – {ticket_no}",
+            f"""This is an automated notification to inform you that a IT Ticket has been sent and logged in to the system:
+    
+Ticket no. {ticket_no}
+    
+The matter is currently under review. Updates will be provided as they become available.
+    
+This is a system-generated message. No action is required unless otherwise indicated.""",
+        )
+
+        flash("IT Ticket submitted successfully.", "success")
+        return redirect(f"/it_form?generated={ticket_no}")
+
+    # GET method (default view)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    return render_template(
+        "it_form.html",
+        it_fields=IT_FIELDS,
+        it_multiline_fields=IT_MULTILINE_FIELDS,
+        today=today_str,
+        location_options=LOCATION_OPTIONS,
+        request_options=REQUEST_OPTIONS,
+        lob_options=LOB_OPTIONS
+    )
 if __name__ == "__main__":
     app.run(debug=True)
