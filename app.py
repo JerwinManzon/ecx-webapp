@@ -26,43 +26,43 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 SCOPE = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
 #------------------------------------------------ LIVE -----------------------------------------------------------------
 # Email
-# SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
-# EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
-#
-# # Google Sheets setup
-# creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
-# creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPE)
-# client = gspread.authorize(creds)
-# sheet = client.open("ECX PROGRESSION").sheet1
-#
-# # IT Form Google Sheets Setup
-# it_creds_dict = json.loads(os.getenv("GOOGLE_IT_CREDS_JSON"))
-# it_creds = Credentials.from_service_account_file(it_creds_dict, scopes=SCOPE)
-# it_client = gspread.authorize(it_creds)
-# it_sheet = it_client.open("IT REQUEST FORM REPOSITORY").sheet1
-#
-# app = Flask(__name__)
-# app.secret_key = "ecx-secret"
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-#------------------------------------------------ LOCAL TESTING --------------------------------------------------------
-# # Email
-SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
-EMAIL_PASSWORD = "bverlbfblogutkkf"
+SENDER_EMAIL = os.getenv("ECX_SENDER_EMAIL")
+EMAIL_PASSWORD = os.getenv("ECX_EMAIL_PASSWORD")
 
 # Google Sheets setup
-creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPE)
+creds_dict = json.loads(os.getenv("GOOGLE_CREDS_JSON"))
+creds = Credentials.from_service_account_info(creds_dict, scopes=SCOPE)
 client = gspread.authorize(creds)
 sheet = client.open("ECX PROGRESSION").sheet1
 
 # IT Form Google Sheets Setup
-it_creds = Credentials.from_service_account_file(IT_CREDENTIALS_PATH, scopes=SCOPE)
+it_creds_dict = json.loads(os.getenv("GOOGLE_IT_CREDS_JSON"))
+it_creds = Credentials.from_service_account_file(it_creds_dict, scopes=SCOPE)
 it_client = gspread.authorize(it_creds)
 it_sheet = it_client.open("IT REQUEST FORM REPOSITORY").sheet1
 
 app = Flask(__name__)
 app.secret_key = "ecx-secret"
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+#------------------------------------------------ LOCAL TESTING --------------------------------------------------------
+# # Email
+# SENDER_EMAIL = "ecxoperationalcompliance@gmail.com"
+# EMAIL_PASSWORD = "bverlbfblogutkkf"
+#
+# # Google Sheets setup
+# creds = Credentials.from_service_account_file(CREDENTIALS_PATH, scopes=SCOPE)
+# client = gspread.authorize(creds)
+# sheet = client.open("ECX PROGRESSION").sheet1
+#
+# # IT Form Google Sheets Setup
+# it_creds = Credentials.from_service_account_file(IT_CREDENTIALS_PATH, scopes=SCOPE)
+# it_client = gspread.authorize(it_creds)
+# it_sheet = it_client.open("IT REQUEST FORM REPOSITORY").sheet1
+#
+# app = Flask(__name__)
+# app.secret_key = "ecx-secret"
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 #----------------------------------------------- START OF WEB-APP ------------------------------------------------------
 

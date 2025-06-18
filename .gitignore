@@ -11,3 +11,4 @@ static/uploads/*
 !static/uploads/.gitkeep
 generated/
 ecx-progression-app-*.json
+it-progression-form-*.json
