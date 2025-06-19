@@ -456,7 +456,7 @@ def it_form():
 
         # Email
         # Determine recipients
-        recipients = [values[2], "manzonmarkjerwin@gmail.com"]
+        recipients = [values[2], "paolocastillo.ecx@gmail.com", "briannarvasa.ecx@gmail.com", "carloseacor.ecx@gmail.com"]
 
         #  Eliminate duplicates
         recipients = list(set(email.lower() for email in recipients))
