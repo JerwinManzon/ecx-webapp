@@ -386,7 +386,7 @@ def send_email(to_emails, subject, body):
 
 #------------------------------------------IT FORM GENERATION -----------------------------------------------------------------------
 
-IT_FIELDS =["Email Address", "Agent Name", "Team Lead", "LOB", "Location", "PC Number", "Request Type", "Specific Request", "Date Requested"]
+IT_FIELDS =["Email Address", "Employee Name", "Team Lead", "LOB", "Location", "PC Number", "Request Type", "Specific Request", "Date Requested"]
 
 LOCATION_OPTIONS = ["Select Location...", "EC Cafe", "Eskina", "Parking Area", "Resto Bar", "Snack Bar", "Training Room", "Conference Room", "2nd Floor (COO Office)", "2nd Floor (HR Office)",
             "2nd Floor (Finance Office)", "3rd Floor (Phase 1)", "3rd Floor (Phase 2)", "4th Floor (Phase 1)", "4th Floor (Phase 2)", "5th Floor (Phase 1)", "5th Floor (CEO Office)"
