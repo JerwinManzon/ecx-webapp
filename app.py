@@ -395,7 +395,7 @@ REQUEST_OPTIONS = ["Select a Request...", "Assistance", "Network Problem", "Soft
 
 IT_MULTILINE_FIELDS = ["Specific Request"]
 
-LOB_OPTIONS = ["Select LOB...", "N/A", "Accounting", "Banking Team", "Best Buy", "Buffer", "Convenience", "Dollar General", "Hospitality", "Industrial Retail", "M&I", "OTR", "Properties","QA", "Restaurant", "Retail", "SMB",
+LOB_OPTIONS = ["Select LOB...", "N/A", "Accounting", "Banking Team", "Best Buy", "Buffer","Chipotle", "Convenience", "Dollar General", " Grease & Oil", "Hospitality", "Industrial Retail", "M&I", "OTR", "Properties","QA", "Restaurant", "Retail", "SMB",
                "Specialty Retail", "Starbucks", "TJX", "TJX-FEDEX","Vouchering", "Walmart", "Weekend Coverage", "Whole Foods"]
 
 @app.route("/it_form", methods =["GET", "POST"])
